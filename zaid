@@ -1,1 +1,80 @@
+from flask import Flask, jsonify, request
+import random
+import time
+
+app = Flask(__name__)
+
+# Simulate dynamic heart rate data (this will be sent to the frontend)
+def generate_heart_rate():
+    # Randomly simulate a heart rate between 60 and 140
+    return random.randint(60, 140)
+
+@app.route('/')
+def index():
+    return "Health Emergency Detection Backend is running"
+
+@app.route('/api/health_check', methods=['POST'])
+def health_check():
+    data = request.get_json()
+    heart_rate = data.get('heartRate')
+    blood_pressure = data.get('bloodPressure')
+
+    # Simulate results based on the heart rate and blood pressure
+    if heart_rate == 0:
+        status = {
+            "status": "Deceased",
+            "message": "With deep condolences, the heart rate is 0. Please contact authorities and family members immediately."
+        }
+    elif heart_rate > 140:
+        status = {
+            "status": "Critical - High Heart Rate",
+            "message": f"Your heart rate is {heart_rate} bpm, indicating a potential heart attack risk. Seek medical attention immediately."
+        }
+    elif heart_rate < 65:
+        status = {
+            "status": "Critical - Low Heart Rate",
+            "message": f"Your heart rate is {heart_rate} bpm, indicating a critical condition. Seek medical attention immediately."
+        }
+    elif heart_rate >= 120:
+        status = {
+            "status": "Above Normal",
+            "message": f"Your heart rate is {heart_rate} bpm, which is higher than normal. Please take some rest and monitor your condition."
+        }
+    else:
+        status = {
+            "status": "Normal",
+            "message": f"Your heart rate is {heart_rate} bpm. Everything looks fine. Keep up the healthy lifestyle!"
+        }
+
+    # Simulate blood pressure feedback (you can extend this logic further)
+    systolic, diastolic = blood_pressure.split('/')
+    systolic = int(systolic)
+    diastolic = int(diastolic)
+
+    if systolic < 90 or diastolic < 60:
+        bp_status = "Low"
+    elif systolic > 140 or diastolic > 90:
+        bp_status = "High"
+    else:
+        bp_status = "Normal"
+
+    response = {
+        "status": status["status"],
+        "message": status["message"],
+        "bloodPressureStatus": bp_status
+    }
+
+    return jsonify(response)
+
+@app.route('/api/simulate_heart_rate', methods=['GET'])
+def simulate_heart_rate():
+    # Simulate heart rate change every time this endpoint is hit
+    heart_rate = generate_heart_rate()
+    return jsonify({
+        "heartRate": heart_rate,
+        "message": "Simulated Heart Rate Update"
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
